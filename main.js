@@ -2,31 +2,28 @@
  * Created by Terence on 2021/9/4 - 4:17 下午
  * Description :
  */
+import { createElement, render, Component } from './toy-react';
 
-for (let i of [1,2,3]) {
-  console.log(i)
-}
-
-function createElement(tagName, attributes, ...children) {
-  let e = document.createElement(tagName);
-
-  for (let key in attributes) {
-    e.setAttribute(key, attributes[key]);
+class MyComponent extends Component {
+  render () {
+    return (
+      <div>
+        <h1>my component</h1>
+        {this.children}
+      </div>
+    )
   }
-
-  for (let child of children) {
-    if (typeof child === 'string') {
-      child = document.createTextNode(child);
-    }
-    e.appendChild(child);
-  }
-
-  return e;
 }
 
 
-document.body.appendChild(<div id="a" className="aa">
+render(<MyComponent id="a" className="aa">
   <div>abc</div>
   <div></div>
   <div></div>
-</div>)
+</MyComponent>, document.body)
+
+
+// 1. 抽离toy-react.js
+// 2.
+// 3.
+// 4.
