@@ -94,7 +94,9 @@ class ElementWrapper extends Component {
   [RENDER_TO_DOM] (range) {
     range.deleteContents();
 
-    let root = document.createElement(this.type);
+    let root = document.createElement(this.type); // 仍然是实dom, 不过目前已经有了dom树, 为dom diff做铺垫.
+
+    // setAttribute 逻辑
     for (let name in this.props) {
       let value = this.props[name];
       if (name.match(/^on([\s\S]+)/)) {
@@ -108,11 +110,12 @@ class ElementWrapper extends Component {
       }
     }
 
+    // appendChild逻辑
     for (let child of this.children) {
       let chilRrange = document.createRange();
       chilRrange.setStart(root, root.childNodes.length);
       chilRrange.setEnd(root, root.childNodes.length);
-      child[RENDER_TO_DOM](chilRrange);
+      child[RENDER_TO_DOM](chilRrange); // 递归渲染child, 直至渲染为TextWrapper.
     }
 
     range.insertNode(root);
@@ -139,6 +142,7 @@ class TextWrapper extends Component  {
   }
 }
 
+// 1. 将自定义组件初始化, 生成虚拟dom树 --> render方法去渲染.
 export function createElement(type, attributes, ...children) {
   let e;
 
@@ -180,5 +184,5 @@ export const render = (component, parentElement) => {
   range.setStart(parentElement, 0);
   range.setEnd(parentElement, parentElement.childNodes.length);
   range.deleteContents();
-  component[RENDER_TO_DOM](range); // --> 渲染节点
+  component[RENDER_TO_DOM](range); // --> 2. 初始点!!!渲染节点 ->
 }
