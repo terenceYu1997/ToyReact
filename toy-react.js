@@ -4,42 +4,8 @@
  */
 const RENDER_TO_DOM = Symbol('render to dom')
 
-class ElementWrapper {
-  constructor (type) {
-    this.root = document.createElement(type);
-  }
-  setAttribute (name, value) {
-    if (name.match(/^on([\s\S]+)/)) {
-      this.root.addEventListener(RegExp.$1.replace(/^[\s\S]/, c => c.toLowerCase()), value)
-    } else {
-      if (name === 'className') {
-        this.root.setAttribute('class', value);
-      } else {
-        this.root.setAttribute(name, value);
-      }
-    }
-  }
-  appendChild (component) {
-    let range = document.createRange();
-    range.setStart(this.root, this.root.childNodes.length);
-    range.setEnd(this.root, this.root.childNodes.length);
-    component[RENDER_TO_DOM](range);
-  }
-  [RENDER_TO_DOM] (range) {
-    range.deleteContents();
-    range.insertNode(this.root);
-  }
-}
-
-class TextWrapper {
-  constructor (content) {
-    this.root = document.createTextNode(content);
-  }
-  [RENDER_TO_DOM] (range) {
-    range.deleteContents();
-    range.insertNode(this.root);
-  }
-}
+// 1. elementwrapper -> get vdom
+// 2. elementwrapper -> get vdom
 
 export class Component {
   constructor () {
@@ -54,6 +20,12 @@ export class Component {
   appendChild (component) {
     this.children.push(component)
   }
+  get vdom () {
+    return this.render().vdom;
+  }
+  // get vchildren () {
+  //   return this.children.map(child => child.vdom); // ???
+  // }
   [RENDER_TO_DOM] (range) {
     this._range = range;
     this.render()[RENDER_TO_DOM](range); // this.render()得到ElementWrapper -> 再让ElementWrapper去渲染出节点.
@@ -86,6 +58,84 @@ export class Component {
     }
     merge(this.state, newState);
     this.rerender();
+  }
+}
+
+class ElementWrapper extends Component {
+  constructor (type) {
+    super(type);
+    this.type = type;
+  }
+  get vdom () {
+    return this;
+    /*{
+      type: this.type,
+      props: this.props,
+      children: this.children.map(child => child.vdom)
+    }*/
+  }
+/*  setAttribute (name, value) {
+    if (name.match(/^on([\s\S]+)/)) {
+      this.root.addEventListener(RegExp.$1.replace(/^[\s\S]/, c => c.toLowerCase()), value)
+    } else {
+      if (name === 'className') {
+        this.root.setAttribute('class', value);
+      } else {
+        this.root.setAttribute(name, value);
+      }
+    }
+  }*/
+/*  appendChild (component) {
+    let range = document.createRange();
+    range.setStart(this.root, this.root.childNodes.length);
+    range.setEnd(this.root, this.root.childNodes.length);
+    component[RENDER_TO_DOM](range);
+  }*/
+  [RENDER_TO_DOM] (range) {
+    range.deleteContents();
+
+    let root = document.createElement(this.type);
+    for (let name in this.props) {
+      let value = this.props[name];
+      if (name.match(/^on([\s\S]+)/)) {
+        root.addEventListener(RegExp.$1.replace(/^[\s\S]/, c => c.toLowerCase()), value)
+      } else {
+        if (name === 'className') {
+          root.setAttribute('class', value);
+        } else {
+          root.setAttribute(name, value);
+        }
+      }
+    }
+
+    for (let child of this.children) {
+      let chilRrange = document.createRange();
+      chilRrange.setStart(root, root.childNodes.length);
+      chilRrange.setEnd(root, root.childNodes.length);
+      child[RENDER_TO_DOM](chilRrange);
+    }
+
+    range.insertNode(root);
+  }
+}
+
+class TextWrapper extends Component  {
+  constructor (content) {
+    super(content);
+    this.type = '#text';
+    this.content = content;
+    this.root = document.createTextNode(content);
+  }
+  get vdom () {
+    return this;
+    /*{
+      type: '#text',
+      content: this.content,
+    }*/
+  }
+  [RENDER_TO_DOM] (range) {
+    range.deleteContents();
+    range.insertNode(this.root);
   }
 }
 
