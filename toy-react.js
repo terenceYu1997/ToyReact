@@ -28,7 +28,7 @@ export class Component {
   // }
   [RENDER_TO_DOM] (range) {
     this._range = range;
-    this.render()[RENDER_TO_DOM](range); // this.render()得到ElementWrapper -> 再让ElementWrapper去渲染出节点.
+    this.render()[RENDER_TO_DOM](range); // this.render()得到createElement包着的的ElementWrapper -> 再让ElementWrapper去渲染出节点.
   }
   rerender () {
     let oldRange = this._range; // 保存oldRage
