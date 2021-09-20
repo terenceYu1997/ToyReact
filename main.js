@@ -88,6 +88,7 @@ class Game extends Component {
   }
 
   render() {
+
     const history = this.state.history;
     const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
@@ -129,7 +130,7 @@ class Game extends Component {
 
 // ========================================
 
-render(<Game />, document.getElementById("root"));
+render(<Game test="这是根节点" />, document.getElementById("root"));
 
 
 // let game = <Game />
